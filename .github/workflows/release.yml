@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Build and Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Extract tag/version
+        id: extract_tag
+        run: |
+          echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - name: Set vars
+        id: vars
+        run: |
+          echo "APP_NAME=python-app" >> $GITHUB_ENV
+          echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          echo "SOURCE_ZIP_NAME=python-app-${GITHUB_REF#refs/tags/}-sources.zip" >> $GITHUB_ENV
+
+
+      - name: Create source zip
+        run: |
+          zip -r "${{ env.SOURCE_ZIP_NAME }}" $(find . -type f -name "*.py" ! -path "./.git/*")  requirements.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ env.VERSION }}
+          name: ${{ env.VERSION }}
+          draft: false
+          prerelease: false
+          files: |
+            ${{ env.SOURCE_ZIP_NAME }}
