@@ -29,7 +29,8 @@ jobs:
 
       - name: Create source zip
         run: |
-          zip -r "${{ env.SOURCE_ZIP_NAME }}" $(find . -type f -name "*.py" ! -path "./.git/*")  requirements.txt
+          echo "web: python app.py" > Procfile
+          zip -r "${{ env.SOURCE_ZIP_NAME }}" $(find . -type f -name "*.py" ! -path "./.git/*")  requirements.txt Procfile
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
